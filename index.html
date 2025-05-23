@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Referrer-Policy" content="no-referrer">
+	<meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://watchnow.one;">
     <title>WatchNow - Stream Movies & Shows</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -835,12 +837,30 @@
             const videoFrame = document.getElementById('videoFrame');
             
             modalTitle.textContent = title;
-            videoFrame.src = `https://watchnow.one/movie/${slug}/embed`;
+            
+            // Set referrer policy and try different embed approaches
+            videoFrame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+            videoFrame.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation');
+            
+            // Try the embed URL with referrer parameter
+            const embedUrl = `https://watchnow.one/movie/${slug}/embed`;
+            videoFrame.src = embedUrl;
+            
             modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
             
             // Focus management for accessibility
             modal.focus();
+            
+            // Handle iframe load errors
+            videoFrame.onload = function() {
+                console.log('Video loaded successfully');
+            };
+            
+            videoFrame.onerror = function() {
+                console.error('Error loading video iframe');
+                showVideoError(title, slug);
+            };
         }
 
         // Close video modal
